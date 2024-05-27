@@ -99,6 +99,36 @@ def load_game(board):
             print("Congradulations! you sunk my battleShip! ")
             print('The current match score is %d : %d (Player1 : Player2)'% (player_one["wins"], player_two["wins"]))
             print("Thanks for Playing!")
+            play_again()
+
+        elif not match:
+            if not_on_game_board
+                print("Oops, that's not even in the ocean! :P.")
+            
+            elif board[guess_row][guess_col] = "X" or board[guess_row][guess_col] == "Y":
+                 print("You've Already guessed that location.")
+
+            else:
+                 print ("You Missed my battleShip!")
+                 if player == player_one:
+                    board[guess_row][guess_col] = "X"
+                else:
+                    board[guess_row][guess_col] = "Y"
+
+            print(colors["cyan"])
+            show_board(game_board)
+            print(colors ["reset"])
+
+        else:
+            return 0
+    
+    def main():
+
+        for turns in range(10):
+            
+
+
+
 
 
 

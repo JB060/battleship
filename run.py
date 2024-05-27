@@ -40,8 +40,11 @@ def load_game(board):
     ship_col = randint(1, len(board))
     ship_row = randint(1, len(board[0]))
     return{
-        
+        'ship_col': ship_col,
+        'ship_row': ship_row,
     }
+
+    ship_points 
 
 
 

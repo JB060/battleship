@@ -56,7 +56,51 @@ def load_game(board):
 
         return player_two
 
-    #Allows new game to start
+    #Allows new game to start.abs
+    def play_again():
+
+        positive = ["yes","y"]
+        negative = ["no""n"]
+
+        global ship_points
+
+        while True:
+            answer = input("play again?[yes/no]:").lower().strip()
+            if answer in positive:
+                ship_points = load_game(game_board)
+                main()
+                break
+
+            elif answer in negative:
+                print("Thanks for Playing!")
+                exit()
+        
+    # what happens with players guesses.
+    def input_check(ship_row, ship_col, player, board):
+        guess_col = 0
+        guess_row = 0
+        while True:
+
+            try:
+                 guess_row int(input("Guess Row:")) - 1
+                 guess_col int(input("Guess Col:")) - 1
+            except ValueError:
+
+                print("Enter a number only: ")
+                continue
+            else:
+
+                break
+        match = guess_row == ship_row - 1 and guess_col == ship_col - 1
+        not_on_game_board = (guess_row < 0 or guess_row > 6) or (guess_col < 0 or guess_col > 6)
+
+        if match:
+            player["wins"] += 1
+            print("Congradulations! you sunk my battleShip! ")
+            print('The current match score is %d : %d (Player1 : Player2)'% (player_one["wins"], player_two["wins"]))
+            print("Thanks for Playing!")
+
+
 
 
 

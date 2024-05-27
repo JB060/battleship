@@ -101,12 +101,9 @@ def play_again():
     positive = ["yes", "y"]
     negative = ["no", "n"]
 
-    global ship_points
-
     while True:
         answer = input("Play again? [yes/no]: ").lower().strip()
         if answer in positive:
-            ship_points = load_game(game_board)
             main()
             break
         elif answer in negative:
@@ -131,12 +128,12 @@ def input_check(player, opponent, board):
 
     if not_on_game_board:
         if player == computer:
-            return
+            return False
         else:
             print("Oops, that's not even in the ocean! :P.")
     elif board[guess_row][guess_col] in ["X", "Y"]:
         if player == computer:
-            return
+            return False
         else:
             print("You've already guessed that location.")
     else:
@@ -148,7 +145,7 @@ def input_check(player, opponent, board):
                     opponent['ships'].remove(ship)
                     print("You sunk a ship!")
                 else:
-                    print("You hit a ship!")
+                    print("You hit a ship! Take another shot!")
                 hit = True
                 break
 
@@ -157,6 +154,7 @@ def input_check(player, opponent, board):
                 board[guess_row][guess_col] = "X"
             else:
                 board[guess_row][guess_col] = "Y"
+            return True
         else:
             print("You missed!")
             board[guess_row][guess_col] = "M"
@@ -170,6 +168,8 @@ def input_check(player, opponent, board):
             print(f"Congratulations! {player['name']} wins!")
             print('The current match score is %d : %d (Player1 : Computer)' % (player_one["wins"], computer["wins"]))
             play_again()
+
+    return False
 
 def computer_guess(board):
     while True:
@@ -190,20 +190,17 @@ def main():
     print("Computer is placing its ships.")
     place_ships(computer, game_board, is_computer=True)
 
-    for turns in range(100):
+    turns = 0
+    while True:
         current_player = player_turns(turns)
         opponent_player = player_one if current_player == computer else computer
         print(f"{current_player['name']}'s turn")
-        input_check(current_player, opponent_player, game_board)
-
-        if turns == 99:
-            print("This game is a draw.")
-            print(colors['red'])
-            show_board(game_board)
-            print(colors['reset'])
-            print('The current match score is %d : %d (Player1 : Computer)' % (player_one["wins"], computer["wins"]))
-            play_again()
+        another_shot = input_check(current_player, opponent_player, game_board)
+        
+        if not another_shot:
+            turns += 1
 
 if __name__ == "__main__":
     main()
+
 

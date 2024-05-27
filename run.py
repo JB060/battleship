@@ -16,9 +16,11 @@ computer = {
 
 colors = {
     "reset": "\033[00m",
+    "black": "\033[30m",
     "red": "\033[91m",
-    "blue": "\033[94m",
+    "green": "\033[92m",
     "cyan": "\033[96m",
+    "blue": "\033[94m",
 }
 
 ship_sizes = [6, 5, 4, 3, 2]
@@ -28,9 +30,19 @@ def build_game_board(board):
     for _ in range(10):
         board.append(["0"] * 10)
 
-def show_board(board):
+def show_board(board, reveal_ships=False):
     for row in board:
-        print(" ".join(row))
+        row_display = []
+        for cell in row:
+            if cell == "S" and reveal_ships:
+                row_display.append(colors["black"] + cell + colors["reset"])
+            elif cell == "X":
+                row_display.append(colors["green"] + cell + colors["reset"])
+            elif cell == "M":
+                row_display.append(colors["red"] + cell + colors["reset"])
+            else:
+                row_display.append(colors["cyan"] + cell + colors["reset"])
+        print(" ".join(row_display))
 
 # Define ship placement by players
 def place_ships(player, board, is_computer=False):
@@ -85,7 +97,7 @@ def place_ships(player, board, is_computer=False):
     player['ships'] = ships
     if not is_computer:
         print(f"{player['name']}'s board:")
-        show_board(board)
+        show_board(board, reveal_ships=True)
         for r in range(10):
             for c in range(10):
                 if board[r][c] == "S":
@@ -131,7 +143,7 @@ def input_check(player, opponent, board):
             return False
         else:
             print("Oops, that's not even in the ocean! :P.")
-    elif board[guess_row][guess_col] in ["X", "Y"]:
+    elif board[guess_row][guess_col] in ["X", "Y", "M"]:
         if player == computer:
             return False
         else:
@@ -150,10 +162,10 @@ def input_check(player, opponent, board):
                 break
 
         if hit:
-            if player == player_one:
-                board[guess_row][guess_col] = "X"
-            else:
-                board[guess_row][guess_col] = "Y"
+            board[guess_row][guess_col] = "X" if player == player_one else "Y"
+            print(colors["cyan"])
+            show_board(game_board, reveal_ships=True)
+            print(colors["reset"])
             return True
         else:
             print("You missed!")
@@ -202,5 +214,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

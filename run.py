@@ -1,155 +1,209 @@
 from random import randint
 
-game_board -[]
+game_board = []
 
 player_one = {
     "name": "player 1",
     "wins": 0,
+    "ships": []
 }
 
-player_two = {
-    "name": "player 2"
-    "wins" : 0,
+computer = {
+    "name": "computer",
+    "wins": 0,
+    "ships": []
 }
 
-colors - {
-    "reset":"\033[00m",
-    "red":"\033[91m",
-    "blue":"\033[94m",
-    "cyan":"\033[96m",
+colors = {
+    "reset": "\033[00m",
+    "red": "\033[91m",
+    "blue": "\033[94m",
+    "cyan": "\033[96m",
 }
 
-#Building our 6X6 Board
+ship_sizes = [6, 5, 4, 3, 2]
+
+# Building our 10x10 board
 def build_game_board(board):
-    for item in range(6):
-        board.append(["0" * 6])
+    for _ in range(10):
+        board.append(["0"] * 10)
 
 def show_board(board):
     for row in board:
-        print("".join (row))
+        print(" ".join(row))
 
-#defining ships location
-def load_game(board):
-    print("WELCOME TO BATTLESHIP")
-    print("Find & sink the other players ships")
-    print("THIS IS A 2 PLAYER GAME ")
-    del board[:]
-    build_game_board(board):
-    print(colors['blue'])
-    show_board(board)
-    print(colors['reset'])
-    ship_col = randint(1, len(board))
-    ship_row = randint(1, len(board[0]))
-    return{
-        'ship_col': ship_col,
-        'ship_row': ship_row,
-    }
-
-    ship_points = load_game(game_board)
-
-    #Players will alternate turns.
-    def player_turns(total_turns):
-
-        if total_turns % 2 == 0
-           total_turns += 1
-           return player_one
-
-        return player_two
-
-    #Allows new game to start.abs
-    def play_again():
-
-        positive = ["yes","y"]
-        negative = ["no""n"]
-
-        global ship_points
-
+# Define ship placement by players
+def place_ships(player, board, is_computer=False):
+    ships = []
+    for size in ship_sizes:
         while True:
-            answer = input("play again?[yes/no]:").lower().strip()
-            if answer in positive:
-                ship_points = load_game(game_board)
-                main()
+            try:
+                if is_computer:
+                    start_row = randint(0, 9)
+                    start_col = randint(0, 9)
+                    orientation = "H" if randint(0, 1) == 0 else "V"
+                else:
+                    print(f"{player['name']}, place your ship of size {size}")
+                    start_row = int(input("Start Row (1-10): ")) - 1
+                    start_col = int(input("Start Col (1-10): ")) - 1
+                    orientation = input("Orientation (H for horizontal, V for vertical): ").upper()
+
+                if orientation == "H":
+                    end_row = start_row
+                    end_col = start_col + size - 1
+                else:
+                    end_row = start_row + size - 1
+                    end_col = start_col
+
+                if end_row >= 10 or end_col >= 10:
+                    if not is_computer:
+                        print("Ship placement is out of bounds. Try again.")
+                    continue
+
+                valid_placement = True
+                for r in range(start_row, end_row + 1):
+                    for c in range(start_col, end_col + 1):
+                        if board[r][c] != "0":
+                            valid_placement = False
+
+                if not valid_placement:
+                    if not is_computer:
+                        print("Invalid placement, ship overlaps another ship. Try again.")
+                    continue
+
+                ships.append([(r, c) for r in range(start_row, end_row + 1) for c in range(start_col, end_col + 1)])
+                for r in range(start_row, end_row + 1):
+                    for c in range(start_col, end_col + 1):
+                        board[r][c] = "S"
                 break
 
-            elif answer in negative:
-                print("Thanks for Playing!")
-                exit()
-        
-    # what happens with players guesses.
-    def input_check(ship_row, ship_col, player, board):
-        guess_col = 0
-        guess_row = 0
-        while True:
-
-            try:
-                 guess_row int(input("Guess Row:")) - 1
-                 guess_col int(input("Guess Col:")) - 1
             except ValueError:
+                if not is_computer:
+                    print("Invalid input. Enter numbers only for rows and columns.")
+                continue
 
+    player['ships'] = ships
+    if not is_computer:
+        print(f"{player['name']}'s board:")
+        show_board(board)
+        for r in range(10):
+            for c in range(10):
+                if board[r][c] == "S":
+                    board[r][c] = "0"  # Reset the board to hide ships
+        print("\n" * 5)  # Clear screen for the next player's placement
+
+def player_turns(total_turns):
+    if total_turns % 2 == 0:
+        return player_one
+    return computer
+
+def play_again():
+    positive = ["yes", "y"]
+    negative = ["no", "n"]
+
+    global ship_points
+
+    while True:
+        answer = input("Play again? [yes/no]: ").lower().strip()
+        if answer in positive:
+            ship_points = load_game(game_board)
+            main()
+            break
+        elif answer in negative:
+            print("Thanks for playing!")
+            exit()
+
+def input_check(player, opponent, board):
+    if player == computer:
+        guess_row, guess_col = computer_guess(board)
+    else:
+        while True:
+            try:
+                guess_row = int(input("Guess Row (1-10): ")) - 1
+                guess_col = int(input("Guess Col (1-10): ")) - 1
+            except ValueError:
                 print("Enter a number only: ")
                 continue
             else:
-
                 break
-        match = guess_row == ship_row - 1 and guess_col == ship_col - 1
-        not_on_game_board = (guess_row < 0 or guess_row > 6) or (guess_col < 0 or guess_col > 6)
 
-        if match:
+    not_on_game_board = (guess_row < 0 or guess_row >= 10) or (guess_col < 0 or guess_col >= 10)
+
+    if not_on_game_board:
+        if player == computer:
+            return
+        else:
+            print("Oops, that's not even in the ocean! :P.")
+    elif board[guess_row][guess_col] in ["X", "Y"]:
+        if player == computer:
+            return
+        else:
+            print("You've already guessed that location.")
+    else:
+        hit = False
+        for ship in opponent['ships']:
+            if (guess_row, guess_col) in ship:
+                ship.remove((guess_row, guess_col))
+                if not ship:
+                    opponent['ships'].remove(ship)
+                    print("You sunk a ship!")
+                else:
+                    print("You hit a ship!")
+                hit = True
+                break
+
+        if hit:
+            if player == player_one:
+                board[guess_row][guess_col] = "X"
+            else:
+                board[guess_row][guess_col] = "Y"
+        else:
+            print("You missed!")
+            board[guess_row][guess_col] = "M"
+        
+        print(colors["cyan"])
+        show_board(game_board)
+        print(colors["reset"])
+
+        if not opponent['ships']:
             player["wins"] += 1
-            print("Congradulations! you sunk my battleShip! ")
-            print('The current match score is %d : %d (Player1 : Player2)'% (player_one["wins"], player_two["wins"]))
-            print("Thanks for Playing!")
+            print(f"Congratulations! {player['name']} wins!")
+            print('The current match score is %d : %d (Player1 : Computer)' % (player_one["wins"], computer["wins"]))
             play_again()
 
-        elif not match:
-            if not_on_game_board
-                print("Oops, that's not even in the ocean! :P.")
-            
-            elif board[guess_row][guess_col] = "X" or board[guess_row][guess_col] == "Y":
-                 print("You've Already guessed that location.")
+def computer_guess(board):
+    while True:
+        guess_row = randint(0, 9)
+        guess_col = randint(0, 9)
+        if board[guess_row][guess_col] not in ["X", "Y", "M"]:
+            return guess_row, guess_col
 
-            else:
-                 print ("You Missed my battleShip!")
-                 if player == player_one:
-                    board[guess_row][guess_col] = "X"
-                else:
-                    board[guess_row][guess_col] = "Y"
+def main():
+    print("WELCOME TO BATTLESHIP")
+    print("Find & sink the other player's ships")
+    print("THIS IS A PLAYER VS COMPUTER GAME")
 
-            print(colors["cyan"])
+    del game_board[:]
+    build_game_board(game_board)
+    print("Player 1, place your ships.")
+    place_ships(player_one, game_board)
+    print("Computer is placing its ships.")
+    place_ships(computer, game_board, is_computer=True)
+
+    for turns in range(100):
+        current_player = player_turns(turns)
+        opponent_player = player_one if current_player == computer else computer
+        print(f"{current_player['name']}'s turn")
+        input_check(current_player, opponent_player, game_board)
+
+        if turns == 99:
+            print("This game is a draw.")
+            print(colors['red'])
             show_board(game_board)
-            print(colors ["reset"])
+            print(colors['reset'])
+            print('The current match score is %d : %d (Player1 : Computer)' % (player_one["wins"], computer["wins"]))
+            play_again()
 
-        else:
-            return 0
-    
-    def main():
+if __name__ == "__main__":
+    main()
 
-        for turns in range(10):
-
-            if player_turns(turns) == player_one:
-                print("Player One")
-                input_check(
-                    ship_points['ship_row'],
-                    ship_points['ship_col'],
-                    player_one, game_board
-
-                )
-
-            elif player_turns(turns) == player_two:
-                print("Player Two")
-                input_check(
-                    ship_points['ship_row'],
-                    ship_points['ship_col'],
-                    player_two, game_board
-                )
-
-            if turns == 9:
-                print("This game is a draw.")
-                print(colors['red'])
-                show_board(game_board)
-                print(colors['reset'])
-                print(ship_points)
-                print('The current match score is %d : %d (Player1 : Player2)' % (player_one['wins'], player_two['wins']))
-                play_again()
-        if __name__ == "__main__":
-            main()

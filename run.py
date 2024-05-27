@@ -125,16 +125,31 @@ def load_game(board):
     def main():
 
         for turns in range(10):
-            
 
+            if player_turns(turns) == player_one:
+                print("Player One")
+                input_check(
+                    ship_points['ship_row'],
+                    ship_points['ship_col'],
+                    player_one, game_board
 
+                )
 
+            elif player_turns(turns) == player_two:
+                print("Player Two")
+                input_check(
+                    ship_points['ship_row'],
+                    ship_points['ship_col'],
+                    player_two, game_board
+                )
 
-
-
-
-
-
-
-
-
+            if turns == 9:
+                print("This game is a draw.")
+                print(colors['red'])
+                show_board(game_board)
+                print(colors['reset'])
+                print(ship_points)
+                print('The current match score is %d : %d (Player1 : Player2)' % (player_one['wins'], player_two['wins']))
+                play_again()
+        if __name__ == "__main__":
+            main()
